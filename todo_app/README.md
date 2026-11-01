@@ -11,4 +11,8 @@ The port is set with the PORT environment variable (default 8000).
     # To run existing application
     kubectl apply -f manifests/deployment.yaml
     kubectl logs -f deployment/todoapp-deployment
+    kubectl port-forward todoapp-deployment-xxxxxxxxxx-xxxxx 3003:3000
+
+## Access
+    Replace the pod name with yours. The format is LOCAL_PORT:CONTAINER_PORT, so 3003 on your laptop goes to 3000 in the pod. Leave that terminal running and open http://localhost:3003 in your browser. You should see your page
     

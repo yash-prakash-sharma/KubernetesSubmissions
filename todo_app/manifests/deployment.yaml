@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: todoapp
-        image: yashprakashsharma/todo-app:v1
+        image: yashprakashsharma/todo-app:v2
         env:
         - name: PORT
           value: "3000"

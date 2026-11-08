@@ -16,4 +16,7 @@ spec:
     spec:
       containers:
       - name: hashgenerator
-        image: yashprakashsharma/hash-app:latest
+        image: yashprakashsharma/hash-app:1.7
+        env:
+        - name: PORT
+          value: "3000"

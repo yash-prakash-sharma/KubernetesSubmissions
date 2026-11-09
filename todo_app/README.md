@@ -3,16 +3,20 @@
 A small web server that prints "Server started in port NNNN" on startup.
 The port is set with the PORT environment variable (default 8000).
 
+## Cluster setup
+
+The Ingress needs a port mapping on the cluster:
+
+    k3d cluster create -p 8081:80@loadbalancer -a 2
+
 ## Run
     # To create your custom image for application
     docker build -t YOUR_DOCKERHUB_USER/ltodo-app:1.2 .
     docker push YOUR_DOCKERHUB_USER/todo-app:1.2
 
-    # To run existing application
-    kubectl apply -f manifests/deployment.yaml
-    kubectl logs -f deployment/todoapp-deployment
-    kubectl apply -f manifests/service.yaml
+    ## Deploy
+    kubectl apply -f manifests/
 
-## Access
-    Replace the pod name with yours. The format is LOCAL_PORT:CONTAINER_PORT, so 3003 on your laptop goes to 3000 in the pod. Leave that terminal running and open http://localhost:3003 in your browser. You should see your page
-    
+## Use
+Open http://localhost:8081 (the cluster must be created with
+`k3d cluster create -p 8081:80@loadbalancer -a 2`).

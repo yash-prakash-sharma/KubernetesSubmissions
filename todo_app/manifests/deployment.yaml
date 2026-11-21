@@ -20,7 +20,7 @@ spec:
           claimName: shared-claim
       containers:
       - name: todoapp
-        image: yashprakashsharma/todo-app:1.12
+        image: yashprakashsharma/todo-app:1.13
         env:
         - name: PORT
           value: "3000"

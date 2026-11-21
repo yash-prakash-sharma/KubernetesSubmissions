@@ -1,7 +1,6 @@
-# Todo app
-
-A small web server that prints "Server started in port NNNN" on startup.
-The port is set with the PORT environment variable (default 8000).
+## Todo UI
+The page has a text input (max 140 characters, with a character counter),
+a Send button (does not send anything yet) and a list of hardcoded todos.
 
 ## Cluster setup
 
@@ -23,8 +22,8 @@ next request fetches a new one. Cached files survive container crashes.
 
 ## Deploy
 # To create your custom image for application
-    docker build -t YOUR_DOCKERHUB_USER/todo-app:1.12 .
-    docker push YOUR_DOCKERHUB_USER/todo-app:1.12
+    docker build -t YOUR_DOCKERHUB_USER/todo-app:1.13 .
+    docker push YOUR_DOCKERHUB_USER/todo-app:1.13
 
 Requires the persistent volume to be set up first.
 

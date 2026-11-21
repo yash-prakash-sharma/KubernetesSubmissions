@@ -1,4 +1,5 @@
 import json
+import html
 import os
 import threading
 import time
@@ -17,23 +18,59 @@ META_FILE = os.path.join(IMAGE_DIR, "meta.json")
 lock = threading.Lock()
 os.makedirs(IMAGE_DIR, exist_ok=True)
 
-HTML = b"""<!DOCTYPE html>
+TODOS = [
+    "Learn JavaScript",
+    "Learn React",
+    "Build a project",
+]
+
+
+def render_page():
+    items = "\n".join(f"      <li>{html.escape(t)}</li>" for t in TODOS)
+    page = f"""<!DOCTYPE html>
 <html>
-  <head><meta charset="utf-8"><title>Todo app</title></head>
-  <body style="font-family: sans-serif; max-width: 600px; margin: 2rem auto;">
+  <head>
+    <meta charset="utf-8">
+    <title>Todo app</title>
+    <style>
+      body {{ font-family: sans-serif; max-width: 600px; margin: 2rem auto; padding: 0 1rem; }}
+      img {{ width: 100%; max-width: 400px; display: block; margin-bottom: 1rem; }}
+      form {{ display: flex; gap: 0.5rem; }}
+      input[type=text] {{ flex: 1; padding: 0.5rem; }}
+      button {{ padding: 0.5rem 1rem; }}
+      #count {{ color: #666; font-size: 0.85rem; margin-top: 0.25rem; }}
+    </style>
+  </head>
+  <body>
     <h1>Todo app</h1>
-    <img src="/image" alt="Random picture" width="400">
+    <img src="/image" alt="Random picture">
     <p>The picture changes every 10 minutes.</p>
+
+    <form id="todo-form">
+      <input type="text" id="todo" maxlength="140" placeholder="What needs to be done?" autocomplete="off">
+      <button type="submit">Send</button>
+    </form>
+    <div id="count">0 / 140</div>
+
     <h2>Todos</h2>
     <ul>
-      <li>Learn JavaScript</li>
-      <li>Learn React</li>
-      <li>Build a project</li>
+{items}
     </ul>
+
+    <script>
+      const input = document.getElementById("todo");
+      const count = document.getElementById("count");
+      input.addEventListener("input", () => {{
+        count.textContent = input.value.length + " / 140";
+      }});
+      document.getElementById("todo-form").addEventListener("submit", (e) => {{
+        e.preventDefault();  // sending is not implemented yet
+      }});
+    </script>
   </body>
 </html>
 """
-
+    return page.encode("utf-8")
 
 def read_meta():
     try:
@@ -92,7 +129,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         if self.path == "/":
-            self.respond(200, "text/html; charset=utf-8", HTML)
+            self.respond(200, "text/html; charset=utf-8", render_page())
         elif self.path == "/image":
             try:
                 self.respond(200, "image/jpeg", get_image())

@@ -1,9 +1,10 @@
 import os
+import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 PORT = int(os.environ.get("PORT", 3000))
 LOG_FILE = os.environ.get("LOG_FILE", "/shared/log.txt")
-PONG_FILE = os.environ.get("PONG_FILE", "/data/pingpongs.txt")
+PING_PONG_URL = os.environ.get("PING_PONG_URL", "http://ping-pong-svc:1234/pings")
 
 
 def last_line(path):
@@ -15,12 +16,13 @@ def last_line(path):
         return None
 
 
-def read_pongs():
+def get_pongs():
     try:
-        with open(PONG_FILE) as f:
-            return int(f.read().strip())
-    except (FileNotFoundError, ValueError):
-        return 0
+        with urllib.request.urlopen(PING_PONG_URL, timeout=3) as resp:
+            return resp.read().decode().strip()
+    except Exception as e:
+        print(f"Could not reach ping-pong: {e}", flush=True)
+        return "unavailable"
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -34,7 +36,7 @@ class Handler(BaseHTTPRequestHandler):
             status, body = 503, b"No log line yet, try again in a few seconds\n"
         else:
             status = 200
-            body = f"{line}.\nPing / Pongs: {read_pongs()}\n".encode()
+            body = f"{line}.\nPing / Pongs: {get_pongs()}\n".encode()
         self.send_response(status)
         self.send_header("Content-Type", "text/plain; charset=utf-8")
         self.end_headers()

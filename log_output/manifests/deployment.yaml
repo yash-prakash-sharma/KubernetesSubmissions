@@ -23,12 +23,12 @@ spec:
             - name: shared-data
               mountPath: /shared
         - name: reader
-          image: yashprakashsharma/log-output-reader:1.11
+          image: yashprakashsharma/log-output-reader:2.1
           env:
             - name: PORT
               value: "3000"
-            - name: PONG_FILE
-              value: /shared/pingpongs.txt
+            - name: PING_PONG_URL
+              value: http://ping-pong-svc:1234/pings
           volumeMounts:
             - name: shared-data
               mountPath: /shared

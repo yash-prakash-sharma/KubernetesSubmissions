@@ -13,19 +13,22 @@ spec:
         app: log-output
     spec:
       volumes:
-        - name: shared-logs
-          emptyDir: {}
+        - name: shared-data
+          persistentVolumeClaim:
+            claimName: shared-claim
       containers:
         - name: writer
           image: yashprakashsharma/log-output-writer:1.10
           volumeMounts:
-            - name: shared-logs
+            - name: shared-data
               mountPath: /shared
         - name: reader
-          image: yashprakashsharma/log-output-reader:1.10
+          image: yashprakashsharma/log-output-reader:1.11
           env:
             - name: PORT
               value: "3000"
+            - name: PONG_FILE
+              value: /shared/pingpongs.txt
           volumeMounts:
-            - name: shared-logs
+            - name: shared-data
               mountPath: /shared

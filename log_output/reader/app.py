@@ -2,7 +2,25 @@ import os
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 PORT = int(os.environ.get("PORT", 3000))
-FILE = os.environ.get("LOG_FILE", "/shared/log.txt")
+LOG_FILE = os.environ.get("LOG_FILE", "/shared/log.txt")
+PONG_FILE = os.environ.get("PONG_FILE", "/data/pingpongs.txt")
+
+
+def last_line(path):
+    try:
+        with open(path) as f:
+            lines = [line.strip() for line in f if line.strip()]
+        return lines[-1] if lines else None
+    except FileNotFoundError:
+        return None
+
+
+def read_pongs():
+    try:
+        with open(PONG_FILE) as f:
+            return int(f.read().strip())
+    except (FileNotFoundError, ValueError):
+        return 0
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -11,13 +29,12 @@ class Handler(BaseHTTPRequestHandler):
             self.send_response(404)
             self.end_headers()
             return
-        try:
-            with open(FILE, "rb") as f:
-                body = f.read()
+        line = last_line(LOG_FILE)
+        if line is None:
+            status, body = 503, b"No log line yet, try again in a few seconds\n"
+        else:
             status = 200
-        except FileNotFoundError:
-            body = b"No log file yet, try again in a few seconds\n"
-            status = 503
+            body = f"{line}.\nPing / Pongs: {read_pongs()}\n".encode()
         self.send_response(status)
         self.send_header("Content-Type", "text/plain; charset=utf-8")
         self.end_headers()

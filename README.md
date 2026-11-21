@@ -11,3 +11,4 @@
 - [1.8.](https://github.com/yash-prakash-sharma/KubernetesSubmissions/tree/1.8/todo_app)
 - [1.9.](https://github.com/yash-prakash-sharma/KubernetesSubmissions/tree/1.9/ping_pong)
 - [1.10.](https://github.com/yash-prakash-sharma/KubernetesSubmissions/tree/1.10/log_output)
+- [1.11.](https://github.com/yash-prakash-sharma/KubernetesSubmissions/tree/1.11/ping_pong)

@@ -14,9 +14,16 @@ spec:
       labels:
         app: ping-pong
     spec:
+      volumes:
+        - name: shared-data
+          persistentVolumeClaim:
+            claimName: shared-claim
       containers:
-      - name: ping-pong
-        image: yashprakashsharma/ping-pong:1.9
-        env:
-        - name: PORT
-          value: "3000"
+        - name: ping-pong
+          image: yashprakashsharma/ping-pong:1.11
+          env:
+          - name: PORT
+            value: "3000"
+          volumeMounts:
+            - name: shared-data
+              mountPath: /data

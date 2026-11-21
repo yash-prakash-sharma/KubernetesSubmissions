@@ -1,5 +1,4 @@
 import json
-import html
 import os
 import threading
 import time
@@ -18,27 +17,19 @@ META_FILE = os.path.join(IMAGE_DIR, "meta.json")
 lock = threading.Lock()
 os.makedirs(IMAGE_DIR, exist_ok=True)
 
-TODOS = [
-    "Learn JavaScript",
-    "Learn React",
-    "Build a project",
-]
-
-
-def render_page():
-    items = "\n".join(f"      <li>{html.escape(t)}</li>" for t in TODOS)
-    page = f"""<!DOCTYPE html>
+HTML = """<!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8">
     <title>Todo app</title>
     <style>
-      body {{ font-family: sans-serif; max-width: 600px; margin: 2rem auto; padding: 0 1rem; }}
-      img {{ width: 100%; max-width: 400px; display: block; margin-bottom: 1rem; }}
-      form {{ display: flex; gap: 0.5rem; }}
-      input[type=text] {{ flex: 1; padding: 0.5rem; }}
-      button {{ padding: 0.5rem 1rem; }}
-      #count {{ color: #666; font-size: 0.85rem; margin-top: 0.25rem; }}
+      body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; padding: 0 1rem; }
+      img { width: 100%; max-width: 400px; display: block; margin-bottom: 1rem; }
+      form { display: flex; gap: 0.5rem; }
+      input[type=text] { flex: 1; padding: 0.5rem; }
+      button { padding: 0.5rem 1rem; }
+      #count { color: #666; font-size: 0.85rem; margin-top: 0.25rem; }
+      #error { color: #b00020; margin-top: 0.5rem; }
     </style>
   </head>
   <body>
@@ -51,26 +42,63 @@ def render_page():
       <button type="submit">Send</button>
     </form>
     <div id="count">0 / 140</div>
+    <div id="error"></div>
 
     <h2>Todos</h2>
-    <ul>
-{items}
-    </ul>
+    <ul id="todos"></ul>
 
     <script>
+      const form = document.getElementById("todo-form");
       const input = document.getElementById("todo");
       const count = document.getElementById("count");
-      input.addEventListener("input", () => {{
+      const error = document.getElementById("error");
+      const list = document.getElementById("todos");
+
+      async function loadTodos() {
+        try {
+          const res = await fetch("/todos");
+          if (!res.ok) throw new Error("status " + res.status);
+          const todos = await res.json();
+          list.replaceChildren(...todos.map((t) => {
+            const li = document.createElement("li");
+            li.textContent = t;
+            return li;
+          }));
+        } catch (e) {
+          error.textContent = "Could not load todos";
+        }
+      }
+
+      input.addEventListener("input", () => {
         count.textContent = input.value.length + " / 140";
-      }});
-      document.getElementById("todo-form").addEventListener("submit", (e) => {{
-        e.preventDefault();  // sending is not implemented yet
-      }});
+      });
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const text = input.value.trim();
+        if (!text) return;
+        error.textContent = "";
+        try {
+          const res = await fetch("/todos", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ todo: text }),
+          });
+          if (!res.ok) throw new Error("status " + res.status);
+          input.value = "";
+          count.textContent = "0 / 140";
+          await loadTodos();
+        } catch (e) {
+          error.textContent = "Could not add the todo";
+        }
+      });
+
+      loadTodos();
     </script>
   </body>
 </html>
-"""
-    return page.encode("utf-8")
+""".encode("utf-8")
+
 
 def read_meta():
     try:
@@ -103,14 +131,12 @@ def get_image():
     with lock:
         meta = read_meta()
         if meta is None or not os.path.exists(IMAGE_FILE):
-            fetch_image()  # first run: nothing cached yet
+            fetch_image()
         elif time.time() - meta["fetched_at"] >= MAX_AGE:
             if not meta["stale_served"]:
-                # expired: serve the old picture one more time
                 meta["stale_served"] = True
                 write_meta(meta)
             else:
-                # the next request after that gets a fresh picture
                 try:
                     fetch_image()
                 except Exception as e:
@@ -129,7 +155,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         if self.path == "/":
-            self.respond(200, "text/html; charset=utf-8", render_page())
+            self.respond(200, "text/html; charset=utf-8", HTML)
         elif self.path == "/image":
             try:
                 self.respond(200, "image/jpeg", get_image())

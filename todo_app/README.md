@@ -1,6 +1,6 @@
 ## Todo UI
 The page has a text input (max 140 characters, with a character counter),
-a Send button (does not send anything yet) and a list of hardcoded todos.
+todos are loaded from and sent to the todo-backend service through /todos.
 
 ## Cluster setup
 
@@ -22,12 +22,13 @@ next request fetches a new one. Cached files survive container crashes.
 
 ## Deploy
 # To create your custom image for application
-    docker build -t YOUR_DOCKERHUB_USER/todo-app:1.13 .
-    docker push YOUR_DOCKERHUB_USER/todo-app:1.13
+    docker build -t YOUR_DOCKERHUB_USER/todo-app:2.2 .
+    docker push YOUR_DOCKERHUB_USER/todo-app:2.2
 
 Requires the persistent volume to be set up first.
 
     kubectl apply -f ../persistentvolume/
+    kubectl apply -f ../todo_backend/manifests/
     kubectl apply -f manifests/
 
 ## Use

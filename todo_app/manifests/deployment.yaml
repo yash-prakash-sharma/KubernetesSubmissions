@@ -14,9 +14,22 @@ spec:
       labels:
         app: todoapp
     spec:
+      volumes:
+      - name: shared-data
+        persistentVolumeClaim:
+          claimName: shared-claim
       containers:
       - name: todoapp
-        image: yashprakashsharma/todo-app:v2
+        image: yashprakashsharma/todo-app:1.12
         env:
         - name: PORT
           value: "3000"
+        - name: IMAGE_DIR
+          value: /data/image
+        - name: IMAGE_MAX_AGE
+          value: "600"
+        - name: ENABLE_SHUTDOWN
+          value: "true"
+        volumeMounts:
+          - name: shared-data
+            mountPath: /data
